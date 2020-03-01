@@ -28,7 +28,7 @@ Connection: keep-alive
 }
 ```
 
-After get an access token from server, send HTTP request with access token to get data as below using Postman  
+After get an access token from server, send HTTP request with the access token to get data as below using Postman  
 ```
 GET http://192.168.0.38:4000/users/ HTTP/1.1
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJnaXRodWIuY29tL2Fobm11bnN1IiwiYXVkIjoxLCJpYXQiOjE1ODMwNTk1MDIsImV4cCI6MTU4MzA2MzEwMn0.0u4pe4nRFgxTddhMqbexylj9uOJuLNHAErr9PrBDsDM
