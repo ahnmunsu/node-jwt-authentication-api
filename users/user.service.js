@@ -12,7 +12,13 @@ module.exports = {
 async function authenticate({ username, password }) {
     const user = users.find(u => u.username === username && u.password === password);
     if (user) {
-        const token = jwt.sign({ sub: user.id }, config.secret);
+        const token = jwt.sign({ 
+                iss: "github.com/ahnmunsu",
+                aud: user.id,
+                iat: Math.floor(Date.now() / 1000),
+                exp: Math.floor(Date.now() / 1000) + 3600  
+            }, 
+            config.secret);
         const { password, ...userWithoutPassword } = user;
         return {
             ...userWithoutPassword,
