@@ -9,7 +9,7 @@ $ npm install
 $ npm run start
 ```
 
-Send HTTP request to get access token as below using Postman  
+Send HTTP request to get an access token as below using Postman  
 ```
 POST http://192.168.0.38:4000/users/authenticate HTTP/1.1
 Content-Type: application/json
