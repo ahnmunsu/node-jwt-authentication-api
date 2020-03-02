@@ -1,13 +1,26 @@
 ﻿const config = require('config.json');
 const jwt = require('jsonwebtoken');
+const randtoken = require('rand-token');
 
 // users hardcoded for simplicity, store in a db for production applications
 const users = [{ id: 1, username: 'test', password: 'test', firstName: 'Test', lastName: 'User' }];
 
+let refreshTokens = {};
+
+/* Tokens are expired quickly for testing */
+const ACCESS_TOKEN_EXPIRE_IN_SEC = 60;
+const REFRESH_TOKEN_EXPIRE_IN_SEC = 120;
+
 module.exports = {
     authenticate,
+    refresh,
+    reject,
     getAll
 };
+
+function getNowInSec() {
+    return Math.floor(Date.now() / 1000);
+}
 
 async function authenticate({ username, password }) {
     const user = users.find(u => u.username === username && u.password === password);
@@ -15,15 +28,48 @@ async function authenticate({ username, password }) {
         const token = jwt.sign({ 
                 iss: "github.com/ahnmunsu",
                 aud: user.id,
-                iat: Math.floor(Date.now() / 1000),
-                exp: Math.floor(Date.now() / 1000) + 3600  
+                iat: getNowInSec(),
+                exp: getNowInSec() + ACCESS_TOKEN_EXPIRE_IN_SEC
             }, 
-            config.secret);
+            config.secret
+        );
+        const refreshToken = randtoken.uid(256);
         const { password, ...userWithoutPassword } = user;
+        refreshTokens[refreshToken] = {
+            userId: user.id,
+            exp: getNowInSec() + REFRESH_TOKEN_EXPIRE_IN_SEC
+        };
         return {
             ...userWithoutPassword,
-            token
+            accessToken: token,
+            refreshToken
         };
+    }
+}
+
+async function refresh({ userId, refreshToken }) {
+    if ((refreshToken in refreshTokens) && 
+        (refreshTokens[refreshToken].userId === userId) &&
+        (refreshTokens[refreshToken].exp > getNowInSec())) {
+        const token = jwt.sign({ 
+                iss: "github.com/ahnmunsu",
+                aud: userId,
+                iat: getNowInSec(),
+                exp: getNowInSec() + ACCESS_TOKEN_EXPIRE_IN_SEC  
+            }, 
+            config.secret
+        );
+        return {
+            accessToken: token
+        };
+    } else {
+        return null;
+    }
+}
+
+async function reject({ refreshToken }) {
+    if (refreshToken in refreshTokens) {
+        delete refreshTokens[refreshToken];
     }
 }
 
