@@ -9,7 +9,7 @@ let refreshTokens = {};
 
 /* Tokens are expired quickly for testing */
 const ACCESS_TOKEN_EXPIRE_IN_SEC = 60;
-const REFRESH_TOKEN_EXPIRE_IN_SEC = 120;
+const REFRESH_TOKEN_EXPIRE_IN_SEC = 300;
 
 module.exports = {
     authenticate,
@@ -47,7 +47,13 @@ async function authenticate({ username, password }) {
     }
 }
 
-async function refresh({ userId, refreshToken }) {
+async function refresh({ userId, accessToken, refreshToken }) {
+    try {
+        let decoded = jwt.verify(accessToken, config.secret);
+    } catch (err) {
+        return null;
+    }
+
     if ((refreshToken in refreshTokens) && 
         (refreshTokens[refreshToken].userId === userId) &&
         (refreshTokens[refreshToken].exp > getNowInSec())) {
